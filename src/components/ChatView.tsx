@@ -173,8 +173,8 @@ export function ChatView({
   const [newMemberName, setNewMemberName] = useState("")
   const [pendingMembers, setPendingMembers] = useState<{ did: string; name: string }[]>([])
   const [confirmAction, setConfirmAction] = useState<{ type: string; label: string; action: () => void } | null>(null)
-  const messagesEndRef = useRef<HTMLDivElement>(null)
-  const logsEndRef = useRef<HTMLDivElement>(null)
+  const messagesAreaRef = useRef<HTMLDivElement>(null)
+  const logsScrollRef = useRef<HTMLDivElement>(null)
 
   const selectedGroup = groups.find(g => g.groupId === selectedGroupId)
   const groupMessages = selectedGroupId ? (messages.get(selectedGroupId) || []) : []
@@ -182,11 +182,13 @@ export function ChatView({
   const msgGroups = groupMessages.length > 0 ? groupMessages : []
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+    const el = messagesAreaRef.current
+    if (el) el.scrollTop = el.scrollHeight
   }, [groupMessages.length])
 
   useEffect(() => {
-    logsEndRef.current?.scrollIntoView({ behavior: "smooth" })
+    const el = logsScrollRef.current
+    if (el) el.scrollTop = el.scrollHeight
   }, [logs.length])
 
   useEffect(() => {
@@ -326,11 +328,10 @@ export function ChatView({
               <div className="logs-dot" />
               <h3>Protocol Logs</h3>
             </div>
-            <div className="logs-scroll">
+            <div className="logs-scroll" ref={logsScrollRef}>
               {logs.map((log, i) => (
                 <div key={i} className="log-entry">{log}</div>
               ))}
-              <div ref={logsEndRef} />
             </div>
           </div>
         ) : selectedGroup ? (
@@ -392,7 +393,7 @@ export function ChatView({
             </div>
 
             {/* Messages */}
-            <div className="messages-area">
+            <div className="messages-area" ref={messagesAreaRef}>
               {msgGroups.length === 0 ? (
                 <div className="empty-state">
                   <div className="empty-state-icon">{ICON.messageCircle(48)}</div>
@@ -419,7 +420,6 @@ export function ChatView({
                   </div>
                 ))
               )}
-              <div ref={messagesEndRef} />
             </div>
 
             {/* Message input */}
